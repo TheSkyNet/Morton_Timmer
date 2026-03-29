@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morton Timmer - Pro Timer Suite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+:root {
+    --primary-color: #38bdf8;
+    --secondary-color: #f8fafc;
+    --accent-color: #f43f5e;
+    --background-color: #0f172a;
+    --card-background: #0f172a;
+    --text-color: #f8fafc;
+    --text-muted: #64748b;
+    --success-color: #10b981;
+    --neutral-color: #1e293b;
+    --border-color: #1e293b;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    transition: all 0.3s ease;
+    overflow-x: hidden;
+}
+
+.container {
+    background-color: var(--card-background);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+h1 {
+    color: var(--text-color);
+    margin: 2rem 0;
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    font-weight: 900;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    opacity: 0.5;
+}
+
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    background-color: var(--background-color);
+    padding: 0;
+    border-radius: 0;
+    margin-bottom: 2rem;
+    border: 2px solid var(--border-color);
+    width: 100%;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    padding: 15px 25px;
+    font-size: clamp(0.8rem, 2vw, 1.1rem);
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.1s;
+    border-radius: 0;
+    flex: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.tab-btn.active {
+    background-color: var(--primary-color);
+    color: var(--background-color);
+}
+
+.tab-btn:hover:not(.active) {
+    color: var(--text-color);
+    background-color: rgba(255,255,255,0.1);
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 1.5rem;
+    width: 100%;
+    flex-grow: 1;
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.section.hidden {
+    display: none;
+}
+
+.timer-display {
+    font-size: clamp(5rem, 20vw, 35rem);
+    font-weight: 900;
+    color: var(--primary-color);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 0.8;
+    margin: auto 0;
+    padding: 1.5rem 0;
+}
+
+#countdown-display {
+    font-size: clamp(4rem, 16vw, 30rem);
+}
+
+#stopwatch-display {
+    font-size: clamp(3rem, 12vw, 22rem);
+}
+
+.next-interval {
+    font-size: 1.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.finished {
+    color: var(--success-color) !important;
+    font-weight: 800;
+    animation: pulse 1s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.settings {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    text-align: left;
+    background: #111b2d;
+    padding: 3rem;
+    border-top: 2px solid var(--border-color);
+    border-bottom: 2px solid var(--border-color);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.time-inputs, .interval-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.input-group label {
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.input-group input:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: transparent;
+}
+
+/* Stepper styles */
+.stepper {
+    display: flex;
+    align-items: stretch;
+    background-color: var(--background-color);
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.stepper:focus-within {
+    border-color: var(--primary-color);
+}
+
+.stepper input {
+    border: none !important;
+    border-radius: 0 !important;
+    width: 65px !important;
+    background: transparent !important;
+    padding: 10px 5px !important;
+    text-align: center;
+    font-size: 1.1rem;
+    color: white;
+    font-weight: 600;
+}
+
+/* Hide arrows from number input */
+.stepper input::-webkit-outer-spin-button,
+.stepper input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.stepper input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.stepper-btn {
+    background: rgba(255,255,255,0.05);
+    border: none;
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: 0 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stepper-btn:hover {
+    background: rgba(255,255,255,0.15);
+    color: white;
+}
+
+.stepper-btn:active {
+    background: var(--primary-color);
+    color: var(--background-color);
+}
+
+
+
+.status-label {
+    font-size: 2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    margin-bottom: -1rem;
+}
+
+.status-work { color: var(--success-color); }
+.status-break { color: var(--accent-color); }
+
+.rounds-display {
+    font-size: 1.5rem;
+    color: var(--text-muted);
+    margin-top: -1.5rem;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    max-width: none;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 2rem;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    transition: all 0.1s;
+    flex: 1;
+    min-width: 200px;
+}
+
+.btn:hover:not(:disabled) {
+    filter: brightness(1.2);
+}
+
+.btn:active:not(:disabled) {
+    filter: brightness(0.8);
+}
+
+.btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    filter: grayscale(1);
+    box-shadow: none;
+    transform: none !important;
+}
+
+.start {
+    background-color: var(--success-color);
+    color: #fff;
+}
+
+.stop {
+    background-color: var(--accent-color);
+    color: #fff;
+}
+
+.reset {
+    background-color: var(--neutral-color);
+    color: #fff;
+}
+
+/* Settings Page Styles */
+.settings-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+}
+
+.settings-card {
+    background: #111b2d;
+    padding: 2rem;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.settings-card h2 {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.settings-option {
+    margin-bottom: 1.5rem;
+}
+
+.settings-option label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.range-input {
+    width: 100%;
+    height: 6px;
+    background: var(--background-color);
+    border-radius: 3px;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.range-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+select.modern-select {
+    width: 100%;
+    padding: 10px;
+    background: var(--background-color);
+    border: 2px solid var(--border-color);
+    color: white;
+    font-size: 1rem;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+}
+
+select.modern-select:focus {
+    border-color: var(--primary-color);
+}
+
+.danger-btn {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 1rem 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    width: 100%;
+    border-radius: 4px;
+    transition: filter 0.2s;
+}
+
+.danger-btn:hover {
+    filter: brightness(1.2);
+}
+
+/* Icons */
+.btn i {
+    margin-right: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding: 0.5rem;
+    }
+
+    .timer-display {
+        font-size: clamp(3rem, 18vw, 15rem);
+        margin: 0.5rem 0;
+    }
+
+    #countdown-display {
+        font-size: clamp(2.5rem, 14vw, 12rem);
+    }
+
+    #stopwatch-display {
+        font-size: clamp(2rem, 10vw, 10rem);
+    }
+    
+    .btn {
+        padding: 2rem 1rem;
+        flex: 1 1 100%;
+    }
+
+    .settings {
+        gap: 1rem;
+        padding: 1rem;
+        width: 100%;
+        border-left: none;
+        border-right: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .tab-btn {
+        padding: 8px 12px;
+    }
+
+    .stepper-btn {
+        padding: 0 10px;
+    }
+
+    .stepper input {
+        width: 50px !important;
+    }
+    
+    .time-inputs, .interval-inputs {
+        gap: 4px;
+    }
+    
+    .controls {
+        gap: 0.75rem;
+    }
+    
+    .btn {
+        width: 100%;
+        max-width: none;
+        flex: 1 1 100%;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Morton Timmer</h1>
+        
+        <div class="tabs">
+            <button id="tab-stopwatch" class="tab-btn active" onclick="showTab('stopwatch')">Stopwatch</button>
+            <button id="tab-countdown" class="tab-btn" onclick="showTab('countdown')">Countdown</button>
+            <button id="tab-workout" class="tab-btn" onclick="showTab('workout')">Workout</button>
+            <button id="tab-interval" class="tab-btn" onclick="showTab('interval')">Beep Timer</button>
+            <button id="tab-settings" class="tab-btn" onclick="showTab('settings')">Settings</button>
+        </div>
+
+        <div id="stopwatch-section" class="section">
+            <div class="timer-display" id="stopwatch-display">00:00:00.00</div>
+            <div class="controls">
+                <button id="stopwatch-start" class="btn start"><i class="fas fa-play"></i>Start</button>
+                <button id="stopwatch-stop" class="btn stop" disabled><i class="fas fa-pause"></i>Stop</button>
+                <button id="stopwatch-reset" class="btn reset"><i class="fas fa-redo"></i>Reset</button>
+            </div>
+        </div>
+
+        <div id="countdown-section" class="section hidden">
+            <div class="settings">
+                <div class="input-group">
+                    <label>Set Time (HH:MM:SS)</label>
+                    <div class="time-inputs">
+                        <div class="stepper">
+                            <button class="stepper-btn" onclick="changeValue('cd-hours', -1)"><i class="fas fa-minus"></i></button>
+                            <input type="number" id="cd-hours" value="0" min="0" max="99" placeholder="HH">
+                            <button class="stepper-btn" onclick="changeValue('cd-hours', 1)"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <span>:</span>
+                        <div class="stepper">
+                            <button class="stepper-btn" onclick="changeValue('cd-minutes', -1)"><i class="fas fa-minus"></i></button>
+                            <input type="number" id="cd-minutes" value="5" min="0" max="59" placeholder="MM">
+                            <button class="stepper-btn" onclick="changeValue('cd-minutes', 1)"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <span>:</span>
+                        <div class="stepper">
+                            <button class="stepper-btn" onclick="changeValue('cd-seconds', -1)"><i class="fas fa-minus"></i></button>
+                            <input type="number" id="cd-seconds" value="0" min="0" max="59" placeholder="SS">
+                            <button class="stepper-btn" onclick="changeValue('cd-seconds', 1)"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="timer-display" id="countdown-display">00:05:00</div>
+            <div class="controls">
+                <button id="countdown-start" class="btn start"><i class="fas fa-play"></i>Start</button>
+                <button id="countdown-stop" class="btn stop" disabled><i class="fas fa-pause"></i>Stop</button>
+                <button id="countdown-reset" class="btn reset"><i class="fas fa-redo"></i>Reset</button>
+            </div>
+        </div>
+
+        <div id="workout-section" class="section hidden">
+            <div class="settings">
+                <div class="input-group">
+                    <label>Rounds</label>
+                    <div class="stepper">
+                        <button class="stepper-btn" onclick="changeValue('wk-rounds', -1)"><i class="fas fa-minus"></i></button>
+                        <input type="number" id="wk-rounds" value="8" min="1" style="width: 60px;">
+                        <button class="stepper-btn" onclick="changeValue('wk-rounds', 1)"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Work (M:S)</label>
+                    <div class="time-inputs">
+                        <div class="stepper">
+                            <button class="stepper-btn" onclick="changeValue('wk-work-min', -1)"><i class="fas fa-minus"></i></button>
+                            <input type="number" id="wk-work-min" value="0" min="0" placeholder="M">
+                            <button class="stepper-btn" onclick="changeValue('wk-work-min', 1)"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <span>:</span>
+                        <div class="stepper">
+                            <button class="stepper-btn" onclick="changeValue('wk-work-sec', -1)"><i class="fas fa-minus"></i></button>
+                            <input type="number" id="wk-work-sec" value="20" min="0" max="59" placeholder="S">
+                            <button class="stepper-btn" onclick="changeValue('wk-work-sec', 1)"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Break (M:S)</label>
+                    <div class="time-inputs">
+                        <div class="stepper">
+                            <button class="stepper-btn" onclick="changeValue('wk-break-min', -1)"><i class="fas fa-minus"></i></button>
+                            <input type="number" id="wk-break-min" value="0" min="0" placeholder="M">
+                            <button class="stepper-btn" onclick="changeValue('wk-break-min', 1)"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <span>:</span>
+                        <div class="stepper">
+                            <button class="stepper-btn" onclick="changeValue('wk-break-sec', -1)"><i class="fas fa-minus"></i></button>
+                            <input type="number" id="wk-break-sec" value="10" min="0" max="59" placeholder="S">
+                            <button class="stepper-btn" onclick="changeValue('wk-break-sec', 1)"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="wk-status" class="status-label">Ready</div>
+            <div class="timer-display" id="workout-display">00:20</div>
+            <div id="wk-rounds-display" class="rounds-display">Round 1 of 8</div>
+            <div class="controls">
+                <button id="workout-start" class="btn start"><i class="fas fa-play"></i>Start</button>
+                <button id="workout-stop" class="btn stop" disabled><i class="fas fa-pause"></i>Stop</button>
+                <button id="workout-reset" class="btn reset"><i class="fas fa-redo"></i>Reset</button>
+            </div>
+        </div>
+
+        <div id="interval-section" class="section hidden">
+            <div class="settings">
+                <div class="input-group">
+                    <label for="total-time">Total Time (min)</label>
+                    <div class="stepper">
+                        <button class="stepper-btn" onclick="changeValue('total-time', -1)"><i class="fas fa-minus"></i></button>
+                        <input type="number" id="total-time" value="10" min="1">
+                        <button class="stepper-btn" onclick="changeValue('total-time', 1)"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Beep Every (M:S)</label>
+                    <div class="interval-inputs">
+                        <div class="stepper">
+                            <button class="stepper-btn" onclick="changeValue('interval-min', -1)"><i class="fas fa-minus"></i></button>
+                            <input type="number" id="interval-min" value="1" min="0" placeholder="M">
+                            <button class="stepper-btn" onclick="changeValue('interval-min', 1)"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <span>:</span>
+                        <div class="stepper">
+                            <button class="stepper-btn" onclick="changeValue('interval-sec', -1)"><i class="fas fa-minus"></i></button>
+                            <input type="number" id="interval-sec" value="0" min="0" max="59" placeholder="S">
+                            <button class="stepper-btn" onclick="changeValue('interval-sec', 1)"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="timer-display" id="interval-display">10:00</div>
+            <div id="next-interval" class="next-interval">Next beep in: 01:00</div>
+            <div class="controls">
+                <button id="interval-start" class="btn start"><i class="fas fa-play"></i>Start</button>
+                <button id="interval-stop" class="btn stop" disabled><i class="fas fa-pause"></i>Stop</button>
+                <button id="interval-reset" class="btn reset"><i class="fas fa-redo"></i>Reset</button>
+            </div>
+        </div>
+
+        <div id="settings-section" class="section hidden">
+            <div class="settings-container">
+                <div class="settings-card">
+                    <h2><i class="fas fa-volume-up"></i> Sound Settings</h2>
+                    <div class="settings-option">
+                        <label>Beep Volume</label>
+                        <input type="range" id="beep-volume" class="range-input" min="0" max="1" step="0.1" value="0.5">
+                    </div>
+                    <div class="settings-option">
+                        <label>Beep Sound</label>
+                        <select id="beep-type" class="modern-select">
+                            <option value="classic">Classic (Sine)</option>
+                            <option value="robot">Robot (Square)</option>
+                            <option value="retro">Retro (Sawtooth)</option>
+                            <option value="laser">Laser (Sweep)</option>
+                            <option value="fun">Fun (Bounce)</option>
+                            <option value="cat">Meow (Cat)</option>
+                            <option value="morton">Morton (Uncertain)</option>
+                            <option value="bro">Gym Bro (Masculine)</option>
+                            <option value="babe">Gym Babe (Feminine)</option>
+                            <option value="coach">Gym Coach (Neutral)</option>
+                        </select>
+                    </div>
+                    <button class="btn reset" onclick="testBeep()" style="width: 100%; min-width: 0; padding: 1rem;">
+                        <i class="fas fa-bell"></i> Test Sound
+                    </button>
+                </div>
+                
+                <div class="settings-card">
+                    <h2><i class="fas fa-user-shield"></i> Persona Settings</h2>
+                    <div class="settings-option">
+                        <label>Gendered Responses</label>
+                        <select id="gendered-enabled" class="modern-select" onchange="saveSettings()">
+                            <option value="true">On</option>
+                            <option value="false">Off (Neutral Only)</option>
+                        </select>
+                    </div>
+                    <div class="settings-option">
+                        <label>Preferred Gender</label>
+                        <select id="user-gender" class="modern-select" onchange="saveSettings()">
+                            <option value="masculine">Masculine</option>
+                            <option value="feminine">Feminine</option>
+                            <option value="neutral">Neutral</option>
+                        </select>
+                    </div>
+                    <div class="settings-option">
+                        <label>Response Sentiment</label>
+                        <select id="response-sentiment" class="modern-select" onchange="saveSettings()">
+                            <option value="positive">Positive Only</option>
+                            <option value="mixed">Mixed</option>
+                            <option value="negative">Negative Only</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h2><i class="fas fa-trash-alt"></i> Data Management</h2>
+                    <div class="settings-option">
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                            Reset all timer values and settings to their default states. This action cannot be undone.
+                        </p>
+                        <button class="danger-btn" onclick="clearAllData()">
+                            <i class="fas fa-exclamation-triangle"></i> Clear All Storage
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+// UI Helpers
+function changeValue(id, delta) {
+    const input = document.getElementById(id);
+    if (!input) return;
+    const min = input.min !== "" ? parseInt(input.min) : 0;
+    const max = input.max !== "" ? parseInt(input.max) : 999;
+    let val = parseInt(input.value) || 0;
+    val = Math.max(min, Math.min(max, val + delta));
+    input.value = val;
+    input.dispatchEvent(new Event('input'));
+}
+
+// Tab Switching
+function showTab(tab) {
+    document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    
+    document.getElementById(`${tab}-section`).classList.remove('hidden');
+    document.getElementById(`tab-${tab}`).classList.add('active');
+    
+    // Save current tab
+    localStorage.setItem('lastTab', tab);
+}
+
+// Sound Helper (Web Audio API)
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let voices = [];
+
+// Advanced Sound Libraries
+const broPhrasesPos = [
+    "Light weight baby!", "Yeah buddy!", "No pain no gain!", "One more rep!", "Focus!",
+    "Ain't nothing but a peanut!", "Don't quit now!", "Push it!", "Kill those weights!", "Maximum effort!",
+    "Beast mode!", "Stay hungry!", "Iron never lies!", "Get big!", "Squeeze!",
+    "Hustle for that muscle!", "Every rep counts!", "No excuses!", "Stronger every day!", "Work harder!",
+    "You're a machine!", "Don't stop till you're done!", "Pain is temporary, glory is forever!",
+    "Go heavy or go home!", "Destroy the ego!", "Fuel the fire!", "Discipline is freedom!",
+    "Grind on!", "Look in the mirror, that's your competition!", "Be the best version of yourself!",
+    "One more!", "Dig deep!", "Show me what you got!", "Power through it!", "Winners win!",
+    "Make it happen!", "Hard work pays off!", "Sweat is just fat crying!", "Shut up and lift!",
+    "The weights won't lift themselves!", "Get it done!", "Finish the set!", "Don't be average!",
+    "Rise and grind!", "Conquer your mind!", "Earned, not given!", "Stay focused on the goal!",
+    "Believe in the gains!", "Trust the process!", "Legacy starts now!", "Every day is gym day!",
+    "Do it for the after photo!", "Weakness is a choice!", "Leave your soul on the iron!",
+    "Train insane or remain the same!", "Embrace the suck!", "Don't count the reps, make the reps count!",
+    "Muscles are made in the kitchen, but earned in the gym!", "Pain is just weakness leaving the body!",
+    "Success is rented, and rent is due every day!", "Lift heavy things until they feel light!",
+    "Your only limit is you!", "Blood, sweat, and iron!", "Don't stop when it hurts, stop when you're done!",
+    "You're stronger than your excuses!", "Whatever it takes!", "Prove them wrong!", "Gains are coming!",
+    "Suffer the pain of discipline, or the pain of regret!", "Be the person you've always wanted to be!",
+    "Iron therapy!", "Grind now, shine later!", "Get comfortable being uncomfortable!",
+    "Focus on the squeeze!", "Make the weights fear you!", "One more set, let's go!",
+    "The only bad workout is the one that didn't happen!", "Sweat today, strength tomorrow!",
+    "Dream big, lift big!", "Keep the fire alive!", "Push your limits!", "Don't settle for less!",
+    "Strive for greatness!", "Stay dedicated, stay strong!", "Your workout is my warm-up!",
+    "Winners never quit!", "Commit to be fit!", "Push yourself to the edge!", "Conquer from within!",
+    "Built not bought!", "Earn your stripes!", "Make it happen today!", "Rise and shine, it's gym time!",
+    "Sore today, strong tomorrow!", "Think big, lift heavy!", "Dedication is the key!",
+    "Motivation gets you started, habit keeps you going!", "Don't wish for it, work for it!",
+    "Failure is just a stepping stone!", "Let's go, one last push!",
+    "Pump it up!", "Getting those boulders for shoulders!", "Natty and proud!", "The pump is better than sex!", "Curls for the girls!", "Sky's out, thighs out!", "Sun's out, guns out!", "Welcome to the gun show!", "Chest day is the best day!", "Leg day? More like best day!", "Full ROM baby!", "Time under tension!", "Progressive overload is king!", "Creatine is my best friend!", "Pre-workout kicking in!", "Let's go, champ!", "Light as a feather!", "You're a legend!", "King of the gym!", "Alpha energy!", "Pure gains!", "Solid as a rock!", "Titan strength!", "Warrior spirit!", "Berserker mode!", "Unleash the beast!", "Iron disciple!", "Barbell master!", "Dumbbell destroyer!", "Keep that intensity!", "God-tier effort!", "Immortal gains!", "Olympian physique!", "Sculpted by iron!", "Forged in the squat rack!", "Deadlift king!", "Squat till you drop!"
+];
+
+const broPhrasesNeg = [
+    "You call that a rep?", "My grandma lifts more than you!", "Put some weight on it, wimp!", "Stop crying!", "You're embarrassing yourself.",
+    "Is that it?", "Go home if you're gonna play around!", "Pathetic effort!", "I've seen toddlers with more grit!", "Zero intensity!",
+    "Weak!", "You're slacking, bro!", "Pick it up!", "Don't be a little girl!", "Quit being lazy!",
+    "The iron doesn't care about your feelings!", "Stop talking, start lifting!", "You're wasting my time!", "That's a warm-up, right?", "I'm disappointed.",
+    "You're better than this mediocre junk!", "Focus, you clown!", "Drop and give me twenty!", "You're getting soft!", "No one cares, work harder!",
+    "Excuses are for losers!", "You're making me look bad!", "Is that sweat or are you just crying?", "Lift it, don't look at it!", "You're a disgrace to the gym!",
+    "Go back to the cardio section!", "Are you done yet? Because you look done.", "Stop sandbagging!", "You're slow!", "Hit it harder!",
+    "I've seen more life in a cemetery!", "Wake up!", "Get your head in the game!", "Move it!", "You're falling behind!",
+    "No one said it was gonna be easy, but you're making it look impossible!", "Stop posing and start pressing!", "You're small!", "Think about the gains you're losing!", "Hard work? You don't know the meaning!",
+    "You're a joke!", "Don't quit now, you haven't even started!", "You're soft as baby food!", "Get angry!", "Use that frustration!",
+    "You're a quitter, aren't you?", "I knew you didn't have it in you.", "Prove me wrong or get out!", "You're just taking up space!", "The weights are winning!",
+    "Don't look at the clock!", "You're pathetic!", "Grow a pair!", "It's just weight, lift it!", "You're a failure until you finish!",
+    "Stop whining!", "Your form is trash!", "I've seen better form at a bar!", "Focus on the weight, not your hair!", "You're a amateur!",
+    "Get it together!", "You're embarrassing the tank top!", "Lions don't lose to sheep, and you're looking like a sheep!", "Stop playing!", "You're a weak link!",
+    "No pain, no gains? You just have no gains!", "You're a disappointment!", "I'm falling asleep here!", "Pick up the pace, turtle!", "You're a loser!",
+    "Don't give up? Too late, you already did in your head!", "You're a waste of chalk!", "Get serious!", "You're a embarrassment!", "Shut up and work!",
+    "You're a disgrace!", "I've seen more muscle on a stick insect!", "You're a joke to the iron!", "Stop being a coward!", "Face the pain!",
+    "You're a weakling!", "Don't come back until you're ready to work!", "You're a nobody!", "The gym is for warriors, not you!", "You're a insult to the sport!",
+    "Get out of your comfort zone!", "You're a slacker!", "I'm done with you!", "You're a zero!", "One more? You can't even do this one!",
+    "You're a waste of a membership!", "Go cry to your mom!", "You're a weak, weak man!", "Pathetic!", "Get moving!",
+    "Do you even lift?", "Skipping leg day again?", "Half-reps don't count!", "Ego lifting at its finest.", "Get some real weights.", "You're taking too long on the bench!", "Put your phone away!", "Rerack your weights, peasant!", "Your form is offensive.", "I've seen better form on a noodle.", "Are you here to talk or work?", "Small calves energy.", "Cardio bunny!", "Stop ego lifting!", "You're shaking, baby!", "Need a spot? For your life?", "Zero progress spotted.", "Go back to the treadmill.", "You look like a string bean.", "Where's the muscle?", "I'm not impressed.", "Total failure.", "Weak Sauce!", "Beta moves.", "No gains zone.", "Soft as a marshmallow.", "You're a cardio specialist.", "Stop hogging the rack!", "Go lift some cotton balls!", "I can smell the weakness.", "You're a disgrace to the tank top.", "Stop admiring yourself.", "Your PR is my warmup.", "Dry scooping won't save you.", "You're just cardio in disguise.", "Weak grip!", "Soft hands!", "Lifting like a tourist."
+];
+
+const babePhrasesPos = [
+    "You got this!", "Keep going!", "Looking good!", "Don't stop!", "Last one, best one!",
+    "Work it!", "Slay!", "Strong is sexy!", "Feel the burn, love the burn!", "Keep that energy!",
+    "Beautiful and strong!", "You're crushing it!", "So proud of you!", "Make yourself proud!",
+    "Glow getter!", "Fit and fabulous!", "Radiate confidence!", "One rep at a time!",
+    "You're a star!", "Keep shining!", "Strength comes from within!", "Own your power!",
+    "Yes you can!", "Push yourself because no one else will!", "You're doing amazing!",
+    "Focus on your strength!", "Love your body!", "Treat your body right!", "Hard work looks good on you!",
+    "Stay fierce!", "You're a warrior!", "Keep the momentum!", "Small steps, big results!",
+    "Celebrate your progress!", "You're unstoppable!", "Be your own inspiration!",
+    "Sweat today, smile tomorrow!", "Keep that fire burning!", "You're a queen!",
+    "Confidence is your best accessory!", "Keep moving!", "Don't look back!", "You're stronger than you think!",
+    "Find your inner strength!", "Stay dedicated!", "Consistency is key!", "Believe in yourself!",
+    "You're worth it!", "Make every minute count!", "You're a champion!", "Sparkle and sweat!",
+    "Mind over matter!", "Don't give up on your dreams!", "Every workout is progress!",
+    "Love the process, love the results!", "You're making it happen!", "Stay focused, stay fabulous!",
+    "Your hard work is paying off!", "Don't compare yourself to others!", "Be the best you!",
+    "You're glowing!", "Healthy is the new happy!", "Stay positive, stay strong!",
+    "Your strength is inspiring!", "You're on the right track!", "Don't stop until you're proud!",
+    "You've got the heart of a lion!", "Keep that smile on your face!", "You're doing great, sweetie!",
+    "Amazing effort!", "Keep your head high!", "You're a force to be reckoned with!",
+    "Your potential is limitless!", "Never settle!", "Strive for progress!", "You're a boss!",
+    "Keep it up, you're doing great!", "Almost there, don't quit!", "You're making a difference!",
+    "Love your journey!", "Every step matters!", "You're a diamond in the rough!",
+    "Stay motivated, stay moving!", "You're a winner in my eyes!", "Keep the drive alive!",
+    "You're a legend in the making!", "Stay empowered and inspired!", "You're a star in the gym today!",
+    "Keep the passion for fitness!", "You're simply the best today!", "Go for it, girl, you're amazing!",
+    "Beautiful effort!", "Keep that focus sharp!", "So much power in you!", "Pure grit and determination!",
+    "Keep the spirit high!", "You're a marvel to watch!", "So strong and capable!",
+    "Keep the rhythm going!", "Stay dedicated to yourself!",
+    "Glow getter!", "Slay the day!", "Strong is the new skinny!", "Confidence is key!", "You're a rockstar!", "Be your own motivation!", "Keep that spark!", "You're shining so bright!", "Radiate positive vibes!", "Fit and fabulous!", "You're a queen of the gym!", "Every sweat drop counts!", "Focus on the feel-good!", "You're doing amazing, sweetie!", "Love your progress!", "Stronger than yesterday!", "Beauty and the bench!", "Glute goals achieved!", "Stay fierce, stay fit!", "Empowered women empower themselves!", "You're a warrior goddess!", "Chase that endorphin rush!", "Believe in your magic!", "Keep the fire alive!", "You're a masterpiece in progress!", "Slay those goals!", "Fitness is a journey, not a destination!", "You're a star!", "Keep pushing, beautiful!", "You've got this, girl!", "Strong and steady!", "Vibrant energy!", "Heart of a champion!", "Grace and grit!", "Limitless potential!", "Unstoppable force!", "You are enough, and more!"
+];
+
+const babePhrasesNeg = [
+    "Are you even trying?", "Don't be a quitter.", "You're better than this mediocre effort.", "You're slowing down!", "Is that all you've got?",
+    "Focus! You're distracted.", "Stop looking in the mirror!", "You're losing your form.", "Don't let them beat you.", "You're slacking.",
+    "I expected more from you.", "Quit the excuses.", "You're being lazy today.", "Is that your 'max'? Cute.", "You're falling behind.",
+    "Get your head in the game!", "Stop whining.", "It's just a little bit of sweat.", "You're making it look hard.", "You're almost at the bottom.",
+    "Don't disappoint me.", "You're acting weak.", "Pick up the pace!", "This isn't a social club.", "Stop checking your phone!",
+    "You're losing your edge.", "Don't give up now, it's embarrassing.", "You're not special, work harder.", "You're a mess.", "Focus on the goal, not the pain.",
+    "You're being a drama queen.", "Just do it and shut up.", "You're wasting your potential.", "I've seen better.", "You're a slow learner.",
+    "Stop faking it.", "You're not as strong as you think.", "Prove you belong here.", "You're a disappointment.", "Don't be basic.",
+    "You're slacking off.", "Get moving, gorgeous, before you're not.", "Stop being so soft.", "You're a quitter.", "You're losing momentum.",
+    "I'm losing patience.", "You're not trying.", "This is pathetic.", "Stop crying over a little burn.", "You're embarrassing yourself.",
+    "Don't look at me like that, work!", "You're a amateur.", "Get over yourself.", "You're a weak link.", "Stop being so delicate.",
+    "You're failing.", "Is that sweat or just desperation?", "You're not making progress.", "You're stuck.", "Don't be a loser.",
+    "You're invisible right now.", "Stop begging for attention and work.", "You're a joke.", "Get serious or get out.", "You're a waste of my time.",
+    "Don't quit, it's too easy.", "You're a coward.", "Stop playing victim.", "You're not that good.", "Work harder, you're not there yet.",
+    "You're a slacker.", "Don't be a 'maybe'.", "You're a zero.", "I'm done with your excuses.", "You're a mess, fix it.",
+    "Stop being so needy.", "You're a disappointment to yourself.", "You're failing the test.", "Get a grip!", "You're a loser if you stop.",
+    "Don't be a 'could have been'.", "You're a nobody.", "Stop wishing, start working.", "You're a embarrassment.", "Get your act together.",
+    "You're a weak girl.", "Don't be a quitter, it's ugly.", "You're a joke to the gym.", "Stop being so fragile.", "You're a failure.",
+    "Don't come back until you have a heart.", "You're a waste of space.", "You're a slacker!", "I'm disappointed in you.", "Get it done!",
+    "You're a zero!", "Stop whining!", "You're a embarrassment!", "Pathetic!", "Move it!",
+    "Is that your 'workout' face?", "I've seen better effort in a spa.", "Don't break a nail, princess.", "Stop checking your hair!", "You're more focused on the selfie.", "Your effort is looking a bit basic.", "Are you here for the workout or the outfit?", "I expected more spark from you.", "You're slacking, and it shows.", "Don't be a wallflower.", "Get off the phone and on the bench!", "Your intensity is at zero.", "I'm not here for the excuses.", "You're losing your glow.", "Stop being so delicate.", "This isn't a fashion show.", "You're falling behind the pack.", "Show some real grit!", "Your form is a mess.", "Don't be a quitter, it's not cute.", "I've seen more energy in a library.", "You're acting like a beginner.", "Get your head in the game, babe.", "Stop whining about the sweat.", "You're being a bit of a drama queen.", "No one is impressed by half-reps.", "You're wasting my time and yours.", "Is that sweat or just tears?", "You're a bit of a disappointment today.", "Wake up and work!", "Stop being so fragile!", "You're a zero right now.", "I'm losing my patience.", "Don't make me roll my eyes.", "Get it together!", "You're a weak link!", "Move it or lose it!", "Pathetic effort, really."
+];
+
+const coachPhrasesPos = [
+    "Let's go!", "Keep it up!", "Stay focused!", "Work hard!", "No excuses!", "Push your limits!", "Believe in yourself!", "One more!", "You can do it!", "Keep moving!",
+    "Almost there!", "Don't give up!", "Stay strong!", "Make it count!", "Focus on the goal!", "Every rep counts!", "Push through it!", "Stay dedicated!", "Consistency is key!", "You've got the power!",
+    "Keep the rhythm!", "Stay in the game!", "Keep pushing!", "Excellence is a habit!", "Commit to it!", "Stronger every day!", "Earn your progress!", "Keep the momentum!", "Trust the process!", "Work for it!",
+    "No shortcuts!", "Stay hungry!", "Be relentless!", "Crush your goals!", "Take it to the next level!", "Stay disciplined!", "Fuel your fire!", "Show up for yourself!", "You are capable!", "Keep striving!",
+    "Make progress, not excuses!", "Every effort matters!", "Stay positive!", "You are a winner!", "Keep the fire burning!", "Focus on your strength!", "Rise and grind!", "Do your best!", "Keep your head up!", "Stay on track!",
+    "Success is earned!", "Keep going strong!", "You have what it takes!", "Stay committed!", "Never settle!", "Push yourself!", "Be the best you!", "Keep the drive!", "Work hard, stay humble!", "Focus and finish!",
+    "One step at a time!", "Stay tough!", "Make today amazing!", "Keep your eyes on the prize!", "You are doing great!", "Stay active!", "Keep your energy up!", "Push it!", "Stay consistent!", "Achieve greatness!",
+    "Keep the pace!", "Stay motivated!", "You are unstoppable!", "Keep working hard!", "Stay focused and determined!", "Every second is an opportunity!", "Keep your spirit high!", "Stay true to your goals!", "You are making progress!", "Keep it moving!",
+    "Stay focused on your why!", "Make every workout your best!", "Keep your drive alive!", "Stay empowered!", "You are a champion!", "Keep your heart in it!", "Stay dedicated to the journey!", "Make it happen today!", "Keep your focus sharp!", "Stay inspired!",
+    "You've got this!", "Keep the intensity!", "Stay on your game!", "Keep pushing forward!", "Stay focused and slay!", "You are a force!", "Keep your eyes ahead!", "Stay strong and capable!", "Keep the grit!", "Stay focused on the finish line!",
+    "Master your craft!", "Precision and power!", "Focus on the technique!", "Every second counts!", "Drive through the floor!", "Explosive movement!", "Perfect form!", "Control the weight!", "Mind-muscle connection!", "Stay in the zone!", "Tactical effort!", "Elite performance!", "Champion mindset!", "Relentless pursuit!", "Disciplined action!", "Strategic progress!", "Standard of excellence!", "Core stability!", "Breathing rhythm!", "Optimal output!", "Peak condition!", "Mechanical advantage!", "Professional grade!", "Systematic growth!", "Foundation of strength!", "Kinetic energy!", "Total focus!", "Unyielding drive!", "Technical mastery!", "Performance optimization!", "Steady state!", "High-intensity work!", "Recovery starts now!", "Fuel your ambition!", "Set the bar high!", "Exceed expectations!", "Lead by example!"
+];
+
+const coachPhrasesNeg = [
+    "Focus! You're slacking!", "Pick up the pace!", "Zero intensity!", "You're wasting your time!", "Form is terrible!",
+    "Concentrate!", "Stop daydreaming!", "You're missing the point!", "Low energy!", "Not good enough!",
+    "Wasted effort!", "You're distracted!", "Get serious!", "Poor performance!", "You're falling behind!",
+    "Stop making excuses!", "Zero focus!", "You're slacking off!", "Pathetic intensity!", "Wake up!",
+    "You're better than this!", "Show some heart!", "Where's the drive?", "You're giving up!", "Weak finish!",
+    "Do it right or don't do it at all!", "You're cutting corners!", "Lack of discipline!", "You're not focused!", "Mediocre!",
+    "Step it up!", "You're coasting!", "No excuses!", "Focus on the reps!", "You're losing it!",
+    "Get it together!", "Unacceptable!", "You're failing the plan!", "Zero grit!", "Move faster!",
+    "Don't be a quitter!", "You're stalling!", "Lack of effort!", "Focus!", "You're drifting!",
+    "Stop the nonsense!", "Get back to work!", "You're slacking!", "Poor form!", "Focus on the goal!",
+    "You're losing time!", "Not even close!", "Try harder!", "You're failing!", "Zero progress!",
+    "Stop being lazy!", "You're avoiding the work!", "Weak mentality!", "Focus!", "Pick it up!",
+    "You're falling apart!", "Disgraceful effort!", "Where is your focus?", "You're a slacker!", "Move!",
+    "Stop complaining!", "Zero passion!", "You're just going through the motions!", "Focus!", "Work harder!",
+    "You're giving 50%!", "Unfocused!", "Weak!", "Get your head in the game!", "Zero discipline!",
+    "Stop the excuses!", "You're failing yourself!", "Move with purpose!", "Focus!", "Try!",
+    "You're a disappointment!", "Get moving!", "Zero intensity!", "You're slacking!", "Focus!",
+    "Pick up the pace!", "You're losing!", "Not good!", "Focus!", "Work!",
+    "You're failing the team!", "Move it!", "Zero focus!", "You're slacking!", "Focus!",
+    "Try harder!", "You're failing!", "Zero grit!", "Move!", "Finish it!",
+    "Technical failure!", "Check your posture!", "Inconsistent effort!", "You're out of alignment!", "Control the descent!", "Stop rushing the reps!", "You're leaking energy!", "Poor execution!", "Focus on the basics!", "You're losing tension!", "Inefficient movement!", "Lack of coordination!", "You're not following the program!", "Sub-optimal performance!", "Zero discipline!", "Your focus is wavering!", "Check your ego!", "You're compromising form!", "Sloppy work!", "Get back to fundamentals!", "You're coasting on momentum!", "Lack of intensity!", "Disorganized effort!", "You're ignoring the cue!", "Faulty mechanics!", "Weak core!", "Ineffective drive!", "You're skipping the eccentric!", "Incomplete range of motion!", "Stop cheating yourself!", "You're better than this mediocre work!", "Get serious about your training!", "You're wasting energy!", "Distracted mindset!", "Unacceptable standard!", "Get your act together!", "Correct your stance!", "Stop the laziness!"
+];
+
+const mortonPhrasesPos = [
+    "Aw geez, you're doing great!", "I-I-I think you got this!", "Holy crap, that's impressive!", "You're like, really fit, aren't you?", "G-g-good job!",
+    "Everyone would be proud, maybe!", "Keep going, I guess!", "Look at you go!", "You're a real hero!", "O-o-okay, nice one!",
+    "Aw man, you're strong!", "I-I wish I was that fit!", "You're like a machine or something!", "W-w-wow, amazing!", "I-I-I'm impressed!",
+    "Aw geez, look at those muscles!", "Y-y-you're really pushing it!", "I said you're okay, probably!", "K-k-keep it up!", "Oh man, that's fast!",
+    "A-a-are you even tired?", "Aw geez, you're a beast!", "I-I-I'm rooting for you!", "W-w-way to go!", "Y-y-you're the best!",
+    "Nobody's even watching, but I am!", "Aw man, you're on fire!", "I-I-I've never seen anyone work so hard!", "G-g-great work!", "Y-y-you're a champion!",
+    "Aw geez, you're actually doing it!", "I-I-I can't believe it!", "W-w-wonderful!", "Y-y-you're incredible!", "K-k-keep those reps coming!",
+    "Aw man, you're a natural!", "I-I-I'm so proud of you!", "Y-y-you're crushing it!", "O-o-oh boy, look at you!", "G-g-good form!",
+    "Aw geez, you're like a superhero!", "I-I-I'm just a sidekick, you're the hero!", "W-w-well done!", "Y-y-you're a legend!", "K-k-keep grinding!",
+    "Aw man, you're a powerhouse!", "I-I-I'm in awe!", "Y-y-you're a star!", "O-o-okay, you win!", "G-g-get it!",
+    "Aw geez, you're so fast!", "I-I-I can't keep up!", "W-w-work it!", "Y-y-you're a pro!", "K-k-keep the pace!",
+    "Aw man, you're a genius at this!", "I-I-I'm amazed!", "Y-y-you're a winner!", "O-o-oh wow!", "G-g-great energy!",
+    "Aw geez, you're so strong!", "I-I-I'm shocked!", "W-w-what a rep!", "Y-y-you're a master!", "K-k-keep the focus!",
+    "Aw man, you're a titan!", "I-I-I'm stunned!", "Y-y-you're a boss!", "O-o-oh man!", "G-g-good effort!",
+    "Aw geez, you're so fit!", "I-I-I'm jealous!", "W-w-what a workout!", "Y-y-you're a beast mode!", "K-k-keep the spirit!",
+    "Aw man, you're a warrior!", "I-I-I'm speechless!", "Y-y-you're a fighter!", "O-o-oh boy!", "G-g-great job today!",
+    "Aw geez, you're so tough!", "I-I-I'm impressed, really!", "W-w-what a set!", "Y-y-you're a legend in the making!", "K-k-keep the fire!",
+    "Aw man, you're a rockstar!", "I-I-I'm your biggest fan!", "Y-y-you're a hero in my eyes!", "O-o-okay, you're the boss!", "G-g-good vibes only!",
+    "Aw geez, you're so fast and strong!", "I-I-I'm just Morton, but you're amazing!", "W-w-what a performance!", "Y-y-you're a true athlete!", "K-k-keep the dream alive!",
+    "Aw man, you're a giant among men!", "I-I-I'm honored to watch!", "Y-y-you're a inspiration!", "O-o-oh man, you're good!", "G-g-great finish!",
+    "Aw geez, that's like, really cool!", "I-I-I didn't think you could do it, but you did!", "Holy crap, you're like a god or something!", "Y-y-you're the king of lifting!", "W-w-wow, that's a lot of weight!", "Aw man, you're making me look bad, in a good way!", "I-I-I'm actually impressed, for once!", "G-g-great job, I guess!", "Y-y-you're crushing it like a pro!", "Aw geez, look at those gains!", "I-I-I'm proud of you, I think!", "W-w-way to go, champ!", "Y-y-you're the best ever!", "Aw man, that's some serious effort!", "I-I-I'm rooting for you, definitely!", "G-g-good form, really!", "Y-y-you're a hero, basically!", "Aw geez, you're so strong!", "I-I-I'm shocked, in a good way!", "W-w-what a rep!", "Y-y-you're a master of the gym!", "Aw man, keep it up!", "I-I-I'm in awe of those muscles!", "G-g-get it, I guess!", "Y-y-you're a star, for real!", "Aw geez, you're so fast!", "I-I-I can't believe my eyes!", "W-w-wonderful job!", "Y-y-you're incredible, seriously!", "Aw man, you're a powerhouse!", "I-I-I'm stunningly impressed!", "G-g-great energy, keep it flowing!", "Y-y-you're a winner, obviously!", "Aw geez, you're so fit!", "I-I-I'm actually jealous!", "W-w-what a workout, wow!", "Y-y-you're a legend, man!"
+];
+
+const mortonPhrasesNeg = [
+    "Aw geez, this is looking bad.", "W-w-what are you doing?", "Oh man, oh god!", "I-I don't think this is working.", "I'm gonna be in trouble!",
+    "W-w-we're gonna fail!", "Stop it, just stop it!", "This is a nightmare!", "I-I-I can't watch!", "Aw geez, not again!",
+    "A-a-are you even trying?", "W-w-we're in trouble!", "I-I-I'm scared!", "O-o-oh no!", "Y-y-you're failing!",
+    "Aw geez, you're so slow!", "I was right about us!", "I-I-I'm disappointed!", "W-w-what's going on?", "T-t-this is a disaster!",
+    "Aw man, you're slacking!", "I-I-I can't handle this!", "O-o-oh boy, here we go!", "Y-y-you're a mess!", "S-s-stop being lazy!",
+    "Aw geez, my heart's racing!", "I would hate this!", "I-I-I'm gonna faint!", "W-w-where's the effort?", "T-t-this is pathetic!",
+    "Aw man, you're a joke!", "I-I-I'm crying inside!", "O-o-oh god, no!", "Y-y-you're a loser!", "G-g-get it together!",
+    "Aw geez, this is embarrassing!", "Everyone's gonna laugh at us!", "I-I-I'm ashamed!", "W-w-why did we do this?", "T-t-this is awful!",
+    "Aw man, you're a quitter!", "I-I-I can't believe you're doing this!", "O-o-oh wow, that's bad!", "Y-y-you're a failure!", "D-d-don't quit now!",
+    "Aw geez, you're so weak!", "They're gonna find out!", "I-I-I'm in shock!", "W-w-what a waste!", "T-t-this is a disgrace!",
+    "Aw man, you're a zero!", "I-I-I'm just a Morton, but even I'm better!", "O-o-oh man, no!", "Y-y-you're a disappointment!", "H-h-hurry up!",
+    "Aw geez, this is a mess!", "I'm gonna be so mad!", "I-I-I'm terrified!", "W-w-what a joke!", "T-t-this is the end!",
+    "Aw man, you're a slacker!", "I-I-I can't stand this!", "O-o-oh boy, not good!", "Y-y-you're a nobody!", "P-p-push harder!",
+    "Aw geez, you're failing me!", "They're gonna replace us!", "I-I-I'm lost!", "W-w-what a disaster!", "T-t-this is a nightmare come true!",
+    "Aw man, you're a loser!", "I-I-I'm so sad!", "O-o-oh god, why!", "Y-y-you're a embarrassment!", "S-s-shut up and work!",
+    "Aw geez, this is a catastrophe!", "I'm gonna be furious!", "I-I-I'm shaking!", "W-w-what a shame!", "T-t-this is the worst!",
+    "Aw man, you're a amateur!", "I-I-I'm done with this!", "O-o-oh man, really?", "Y-y-you're a joke to the gym!", "M-m-move it!",
+    "Aw geez, you're so fragile!", "I'm gonna be disappointed!", "I-I-I'm in pain watching!", "W-w-what a mess we're in!", "T-t-this is just sad!",
+    "Aw man, you're a weak link!", "I-I-I'm losing my mind!", "O-o-oh boy, help!", "Y-y-you're a failure as a athlete!", "F-f-finish the set!",
+    "Aw geez, you're a coward!", "They're gonna mock us forever!", "I-I-I'm giving up on you!", "W-w-what a waste of space!", "T-t-this is the final straw!",
+    "Aw geez, this is, like, really painful to watch.", "W-w-what place are we in where this is a workout?", "Oh man, oh god, your form!", "I-I-I think you're gonna break something!", "They're gonna make fun of us forever!", "W-w-we're gonna die of embarrassment!", "Stop it, just stop, it's too much!", "This is a literal nightmare!", "I-I-I can't even look!", "Aw geez, why are you doing this to yourself?", "A-a-are you sure you're okay?", "W-w-we're in real trouble now!", "I-I-I'm scared of how bad this is!", "O-o-oh no, not the weights!", "Y-y-you're failing, like, really hard!", "Aw geez, you're slower than a snail!", "I was right, we're useless!", "I-I-I'm so disappointed in us!", "W-w-what is even happening right now?", "T-t-this is a total disaster!", "Aw man, you're slacking so much!", "I-I-I can't handle the cringe!", "O-o-oh boy, here comes the failure!", "Y-y-you're a mess, a hot mess!", "S-s-stop being so lazy, geez!", "Aw geez, my heart can't take this!", "I would literally run away right now!", "I-I-I'm gonna faint from the lack of effort!", "W-w-where is the intensity, man?", "T-t-this is just pathetic, I'm sorry!", "Aw man, you're a total joke!", "I-I-I'm crying for your gains!", "O-o-oh god, please stop!", "Y-y-you're a loser ever!", "G-g-get it together, seriously!", "Aw geez, this is so embarrassing!", "They're gonna laugh until they faint!", "I-I-I'm ashamed to be here!"
+];
+
+function loadVoices() {
+    voices = window.speechSynthesis.getVoices();
+}
+if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+}
+loadVoices();
+
+function playBeep(freq = 880, duration = 0.2, volOverride = null) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    
+    const userVol = parseFloat(document.getElementById('beep-volume').value);
+    const vol = volOverride !== null ? volOverride : userVol;
+    const type = document.getElementById('beep-type').value;
+
+    // Enhanced Human-Like Synthesis
+    if (type === 'bro' || type === 'babe' || type === 'coach' || type === 'morton') {
+        const msg = new SpeechSynthesisUtterance();
+        msg.volume = vol;
+        const allVoices = window.speechSynthesis.getVoices();
+        
+        const genderedEnabled = document.getElementById('gendered-enabled').value === 'true';
+        const userGender = document.getElementById('user-gender').value;
+        const sentiment = document.getElementById('response-sentiment').value;
+        
+        let posPool = coachPhrasesPos;
+        let negPool = coachPhrasesNeg;
+
+        if (type === 'morton') {
+            posPool = mortonPhrasesPos;
+            negPool = mortonPhrasesNeg;
+        } else if (genderedEnabled) {
+            if (userGender === 'masculine') {
+                posPool = broPhrasesPos;
+                negPool = broPhrasesNeg;
+            } else if (userGender === 'feminine') {
+                posPool = babePhrasesPos;
+                negPool = babePhrasesNeg;
+            }
+        }
+        
+        let pool = [];
+        if (sentiment === 'positive') pool = posPool;
+        else if (sentiment === 'negative') pool = negPool;
+        else pool = [...posPool, ...negPool];
+        
+        msg.text = pool[Math.floor(Math.random() * pool.length)];
+
+        if (type === 'babe') {
+            msg.pitch = 1.2;
+            msg.rate = 1.1; // Energetic
+            const femaleVoice = allVoices.find(v => 
+                (v.name.includes('Female') || v.name.includes('Google US English') || v.name.includes('Samantha')) 
+                && v.lang.startsWith('en')
+            );
+            if (femaleVoice) msg.voice = femaleVoice;
+        } else if (type === 'bro') {
+            msg.pitch = 0.7; // Deeper, more "bro"
+            msg.rate = 1.1; // More energetic
+            const maleVoice = allVoices.find(v => 
+                (v.name.includes('Male') || v.name.includes('Google UK English Male') || v.name.includes('Daniel')) 
+                && v.lang.startsWith('en')
+            );
+            if (maleVoice) msg.voice = maleVoice;
+        } else if (type === 'morton') {
+            msg.pitch = 1.4; // Higher, more Morton-like
+            msg.rate = 1.0; 
+            const youngerVoice = allVoices.find(v => 
+                (v.name.includes('Google US English') || v.name.includes('Samantha') || v.name.includes('Zira')) 
+                && v.lang.startsWith('en')
+            );
+            if (youngerVoice) msg.voice = youngerVoice;
+        } else {
+            msg.pitch = 1.0;
+            msg.rate = 1.0;
+        }
+        
+        window.speechSynthesis.speak(msg);
+        return;
+    }
+
+    // Cat Meow Synthesis (Improved)
+    if (type === 'cat') {
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+        
+        osc.connect(filter);
+        filter.connect(g);
+        g.connect(audioCtx.destination);
+        
+        osc.type = 'sawtooth'; // Richer harmonics for cat sound
+        filter.type = 'lowpass';
+        
+        const now = audioCtx.currentTime;
+        
+        // Meow frequency sweep
+        osc.frequency.setValueAtTime(450, now);
+        osc.frequency.exponentialRampToValueAtTime(850, now + 0.1);
+        osc.frequency.exponentialRampToValueAtTime(550, now + 0.5);
+        
+        // Filter sweep to make it "vowel-like" (m-e-o-w)
+        filter.frequency.setValueAtTime(2000, now);
+        filter.frequency.exponentialRampToValueAtTime(500, now + 0.5);
+        
+        g.gain.setValueAtTime(0, now);
+        g.gain.linearRampToValueAtTime(vol, now + 0.05);
+        g.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        
+        osc.start();
+        osc.stop(now + 0.5);
+        return;
+    }
+
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    if (type === 'robot') oscillator.type = 'square';
+    else if (type === 'retro') oscillator.type = 'sawtooth';
+    else if (type === 'fun' || type === 'laser') oscillator.type = 'triangle';
+    else oscillator.type = 'sine';
+
+    if (type === 'laser') {
+        oscillator.frequency.setValueAtTime(freq * 1.5, audioCtx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(freq * 0.5, audioCtx.currentTime + duration);
+    } else if (type === 'fun') {
+        oscillator.frequency.setValueAtTime(freq * 0.8, audioCtx.currentTime);
+        oscillator.frequency.linearRampToValueAtTime(freq * 1.2, audioCtx.currentTime + duration * 0.5);
+        oscillator.frequency.linearRampToValueAtTime(freq * 1.0, audioCtx.currentTime + duration);
+    } else {
+        oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    }
+
+    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + 0.01);
+    gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + duration);
+
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + duration);
+}
+
+function testBeep() {
+    playBeep(880, 0.3);
+}
+
+function clearAllData() {
+    if (confirm("Are you sure you want to clear all data and settings?")) {
+        localStorage.clear();
+        location.reload();
+    }
+}
+
+// Persistence: Load/Save Settings
+const settingsInputs = [
+    'cd-hours', 'cd-minutes', 'cd-seconds',
+    'wk-rounds', 'wk-work-min', 'wk-work-sec', 'wk-break-min', 'wk-break-sec',
+    'total-time', 'interval-min', 'interval-sec',
+    'beep-volume', 'beep-type', 'gendered-enabled', 'user-gender', 'response-sentiment'
+];
+
+function saveSettings() {
+    settingsInputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) localStorage.setItem(id, input.value);
+    });
+}
+
+function loadSettings() {
+    settingsInputs.forEach(id => {
+        let savedValue = localStorage.getItem(id);
+        const input = document.getElementById(id);
+        if (savedValue !== null && input) {
+            // Migration for renamed Morty persona
+            if (id === 'beep-type' && savedValue === 'morty') savedValue = 'morton';
+            input.value = savedValue;
+        }
+    });
+    
+    // Restore last tab
+    const lastTab = localStorage.getItem('lastTab');
+    if (lastTab) showTab(lastTab);
+    
+    // Initial display updates
+    updateCountdownDisplay();
+    updateWorkoutDisplay();
+    updateIntervalDisplay();
+}
+
+    settingsInputs.forEach(id => {
+    const input = document.getElementById(id);
+    if (input) input.addEventListener('input', () => {
+        saveSettings();
+        if (id.startsWith('cd-')) updateCountdownDisplay();
+        if (id.startsWith('wk-')) updateWorkoutDisplay();
+        if (id === 'total-time') updateIntervalDisplay();
+    });
+    if (input && input.tagName === 'SELECT') {
+        input.addEventListener('change', saveSettings);
+    }
+});
+
+window.addEventListener('DOMContentLoaded', loadSettings);
+
+// Formatting Helpers
+function formatHms(ms) {
+    const hours = Math.floor(ms / 3600000);
+    const minutes = Math.floor((ms % 3600000) / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function formatMs(ms) {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// Stopwatch Logic
+let stopwatchInterval;
+let stopwatchTime = 0; // in milliseconds
+
+const stopwatchDisplay = document.getElementById('stopwatch-display');
+const stopwatchStartBtn = document.getElementById('stopwatch-start');
+const stopwatchStopBtn = document.getElementById('stopwatch-stop');
+const stopwatchResetBtn = document.getElementById('stopwatch-reset');
+
+function formatStopwatch(ms) {
+    const hours = Math.floor(ms / 3600000);
+    const minutes = Math.floor((ms % 3600000) / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    const centiseconds = Math.floor((ms % 1000) / 10);
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`;
+}
+
+stopwatchStartBtn.addEventListener('click', () => {
+    const startTime = Date.now() - stopwatchTime;
+    stopwatchInterval = setInterval(() => {
+        stopwatchTime = Date.now() - startTime;
+        stopwatchDisplay.textContent = formatStopwatch(stopwatchTime);
+    }, 10);
+    stopwatchStartBtn.disabled = true;
+    stopwatchStopBtn.disabled = false;
+});
+
+stopwatchStopBtn.addEventListener('click', () => {
+    clearInterval(stopwatchInterval);
+    stopwatchStartBtn.disabled = false;
+    stopwatchStopBtn.disabled = true;
+});
+
+stopwatchResetBtn.addEventListener('click', () => {
+    clearInterval(stopwatchInterval);
+    stopwatchTime = 0;
+    stopwatchDisplay.textContent = "00:00:00.00";
+    stopwatchStartBtn.disabled = false;
+    stopwatchStopBtn.disabled = true;
+});
+
+// Countdown Logic
+let countdownTimerId;
+let countdownRemaining; // ms
+
+const countdownDisplay = document.getElementById('countdown-display');
+const countdownStartBtn = document.getElementById('countdown-start');
+const countdownStopBtn = document.getElementById('countdown-stop');
+const countdownResetBtn = document.getElementById('countdown-reset');
+
+function updateCountdownDisplay() {
+    if (countdownTimerId) return;
+    const h = parseInt(document.getElementById('cd-hours').value) || 0;
+    const m = parseInt(document.getElementById('cd-minutes').value) || 0;
+    const s = parseInt(document.getElementById('cd-seconds').value) || 0;
+    countdownRemaining = (h * 3600 + m * 60 + s) * 1000;
+    countdownDisplay.textContent = formatHms(countdownRemaining);
+    countdownDisplay.classList.remove('finished');
+}
+
+countdownStartBtn.addEventListener('click', () => {
+    if (!countdownTimerId) {
+        if (countdownRemaining === undefined || countdownRemaining <= 0) updateCountdownDisplay();
+        if (countdownRemaining <= 0) return;
+
+        countdownTimerId = setInterval(() => {
+            countdownRemaining -= 1000;
+            if (countdownRemaining <= 0) {
+                countdownRemaining = 0;
+                clearInterval(countdownTimerId);
+                countdownTimerId = null;
+                playBeep(440, 0.5);
+                setTimeout(() => playBeep(440, 0.5), 600);
+                countdownDisplay.classList.add('finished');
+                countdownStartBtn.disabled = false;
+                countdownStopBtn.disabled = true;
+            }
+            countdownDisplay.textContent = formatHms(countdownRemaining);
+        }, 1000);
+    }
+    countdownStartBtn.disabled = true;
+    countdownStopBtn.disabled = false;
+    document.querySelectorAll('#countdown-section input').forEach(i => i.disabled = true);
+});
+
+countdownStopBtn.addEventListener('click', () => {
+    clearInterval(countdownTimerId);
+    countdownTimerId = null;
+    countdownStartBtn.disabled = false;
+    countdownStopBtn.disabled = true;
+});
+
+countdownResetBtn.addEventListener('click', () => {
+    clearInterval(countdownTimerId);
+    countdownTimerId = null;
+    updateCountdownDisplay();
+    countdownStartBtn.disabled = false;
+    countdownStopBtn.disabled = true;
+    document.querySelectorAll('#countdown-section input').forEach(i => i.disabled = false);
+});
+
+// Workout Logic
+let workoutTimerId;
+let workoutPhase; // 'work' or 'break'
+let workoutRound;
+let workoutTotalRounds;
+let workoutRemainingMs;
+
+const workoutDisplay = document.getElementById('workout-display');
+const workoutStatus = document.getElementById('wk-status');
+const workoutRoundsDisplay = document.getElementById('wk-rounds-display');
+const workoutStartBtn = document.getElementById('workout-start');
+const workoutStopBtn = document.getElementById('workout-stop');
+const workoutResetBtn = document.getElementById('workout-reset');
+
+function updateWorkoutDisplay() {
+    if (workoutTimerId) return;
+    const wm = parseInt(document.getElementById('wk-work-min').value) || 0;
+    const ws = parseInt(document.getElementById('wk-work-sec').value) || 0;
+    workoutRemainingMs = (wm * 60 + ws) * 1000;
+    workoutDisplay.textContent = formatMs(workoutRemainingMs);
+    workoutDisplay.classList.remove('finished');
+    workoutStatus.textContent = "Ready";
+    workoutStatus.className = "status-label";
+    const totalR = document.getElementById('wk-rounds').value;
+    workoutRoundsDisplay.textContent = `Round 1 of ${totalR}`;
+}
+
+workoutStartBtn.addEventListener('click', () => {
+    if (!workoutTimerId) {
+        if (workoutRound === undefined) {
+            workoutRound = 1;
+            workoutPhase = 'work';
+            workoutTotalRounds = parseInt(document.getElementById('wk-rounds').value) || 1;
+            const wm = parseInt(document.getElementById('wk-work-min').value) || 0;
+            const ws = parseInt(document.getElementById('wk-work-sec').value) || 0;
+            workoutRemainingMs = (wm * 60 + ws) * 1000;
+        }
+
+        workoutTimerId = setInterval(() => {
+            workoutRemainingMs -= 1000;
+            
+            if (workoutRemainingMs <= 0) {
+                if (workoutPhase === 'work') {
+                    playBeep(660, 0.3); // Break alert
+                    workoutPhase = 'break';
+                    const bm = parseInt(document.getElementById('wk-break-min').value) || 0;
+                    const bs = parseInt(document.getElementById('wk-break-sec').value) || 0;
+                    workoutRemainingMs = (bm * 60 + bs) * 1000;
+                } else {
+                    workoutRound++;
+                    if (workoutRound > workoutTotalRounds) {
+                        clearInterval(workoutTimerId);
+                        workoutTimerId = null;
+                        workoutStatus.textContent = "Finished!";
+                        workoutDisplay.classList.add('finished');
+                        playBeep(880, 0.5);
+                        setTimeout(() => playBeep(880, 0.5), 600);
+                        workoutStartBtn.disabled = false;
+                        workoutStopBtn.disabled = true;
+                        return;
+                    }
+                    playBeep(880, 0.3); // Work alert
+                    workoutPhase = 'work';
+                    const wm = parseInt(document.getElementById('wk-work-min').value) || 0;
+                    const ws = parseInt(document.getElementById('wk-work-sec').value) || 0;
+                    workoutRemainingMs = (wm * 60 + ws) * 1000;
+                }
+            }
+            
+            workoutDisplay.textContent = formatMs(workoutRemainingMs);
+            workoutStatus.textContent = workoutPhase.toUpperCase();
+            workoutStatus.className = `status-label status-${workoutPhase}`;
+            workoutRoundsDisplay.textContent = `Round ${workoutRound} of ${workoutTotalRounds}`;
+        }, 1000);
+    }
+    workoutStartBtn.disabled = true;
+    workoutStopBtn.disabled = false;
+    document.querySelectorAll('#workout-section input').forEach(i => i.disabled = true);
+});
+
+workoutStopBtn.addEventListener('click', () => {
+    clearInterval(workoutTimerId);
+    workoutTimerId = null;
+    workoutStartBtn.disabled = false;
+    workoutStopBtn.disabled = true;
+});
+
+workoutResetBtn.addEventListener('click', () => {
+    clearInterval(workoutTimerId);
+    workoutTimerId = null;
+    workoutRound = undefined;
+    updateWorkoutDisplay();
+    workoutStartBtn.disabled = false;
+    workoutStopBtn.disabled = true;
+    document.querySelectorAll('#workout-section input').forEach(i => i.disabled = false);
+});
+
+// Beep Timer Logic (formerly Interval Timer)
+let intervalTimerId;
+let intervalTotalRemaining;
+let currentIntervalRemaining;
+let intervalDuration;
+
+const intervalDisplay = document.getElementById('interval-display');
+const nextIntervalDisplay = document.getElementById('next-interval');
+const intervalStartBtn = document.getElementById('interval-start');
+const intervalStopBtn = document.getElementById('interval-stop');
+const intervalResetBtn = document.getElementById('interval-reset');
+
+function updateIntervalDisplay() {
+    if (intervalTimerId) return;
+    const totalMin = parseInt(document.getElementById('total-time').value) || 0;
+    intervalTotalRemaining = totalMin * 60000;
+    intervalDisplay.textContent = formatMs(intervalTotalRemaining);
+    intervalDisplay.classList.remove('finished');
+    nextIntervalDisplay.textContent = "Next beep in: --:--";
+}
+
+intervalStartBtn.addEventListener('click', () => {
+    if (!intervalTimerId) {
+        if (intervalTotalRemaining === undefined) updateIntervalDisplay();
+        
+        const totalMin = parseInt(document.getElementById('total-time').value) || 0;
+        const intervalMin = parseInt(document.getElementById('interval-min').value) || 0;
+        const intervalSec = parseInt(document.getElementById('interval-sec').value) || 0;
+        intervalDuration = (intervalMin * 60 + intervalSec) * 1000;
+        
+        if (intervalTotalRemaining <= 0 || intervalDuration <= 0) return;
+        if (currentIntervalRemaining === undefined) currentIntervalRemaining = intervalDuration;
+
+        intervalTimerId = setInterval(() => {
+            intervalTotalRemaining -= 1000;
+            currentIntervalRemaining -= 1000;
+
+            if (intervalTotalRemaining <= 0) {
+                clearInterval(intervalTimerId);
+                intervalTimerId = null;
+                intervalDisplay.textContent = "00:00";
+                nextIntervalDisplay.textContent = "Finished!";
+                nextIntervalDisplay.classList.add('finished');
+                playBeep(880, 0.5);
+                setTimeout(() => playBeep(880, 0.5), 300);
+                intervalStartBtn.disabled = false;
+                intervalStopBtn.disabled = true;
+                return;
+            }
+
+            if (currentIntervalRemaining <= 0) {
+                playBeep(880, 0.2);
+                currentIntervalRemaining = Math.min(intervalDuration, intervalTotalRemaining);
+            }
+
+            intervalDisplay.textContent = formatMs(intervalTotalRemaining);
+            nextIntervalDisplay.textContent = `Next beep in: ${formatMs(currentIntervalRemaining)}`;
+        }, 1000);
+    }
+    intervalStartBtn.disabled = true;
+    intervalStopBtn.disabled = false;
+    document.querySelectorAll('#interval-section input').forEach(i => i.disabled = true);
+});
+
+intervalStopBtn.addEventListener('click', () => {
+    clearInterval(intervalTimerId);
+    intervalTimerId = null;
+    intervalStartBtn.disabled = false;
+    intervalStopBtn.disabled = true;
+});
+
+intervalResetBtn.addEventListener('click', () => {
+    clearInterval(intervalTimerId);
+    intervalTimerId = null;
+    intervalTotalRemaining = undefined;
+    currentIntervalRemaining = undefined;
+    updateIntervalDisplay();
+    intervalStartBtn.disabled = false;
+    intervalStopBtn.disabled = true;
+    document.querySelectorAll('#interval-section input').forEach(i => i.disabled = false);
+});
+    </script>
+</body>
+</html>
