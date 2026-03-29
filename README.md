@@ -23,5 +23,10 @@ This project is ready to be hosted on GitHub Pages. To enable it:
 3. Under **Build and deployment**, select **GitHub Actions** as the source.
 4. The included workflow will automatically deploy your site whenever you push to the `master` branch.
 
+## Installation (PWA)
+Morton Timmer is a Progressive Web App. You can install it on your mobile device for a native-like experience:
+- **iOS (iPhone/iPad)**: Open the site in Safari, tap the **Share** button, and select **Add to Home Screen**.
+- **Android**: Open the site in Chrome, tap the three dots icon, and select **Install app** or **Add to Home screen**.
+
 ## Local Development
 Since this is a single-file application, you can just open `index.html` in any modern web browser.
