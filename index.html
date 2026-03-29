@@ -21,10 +21,11 @@
     --background-color: #0f172a;
     --card-background: #0f172a;
     --text-color: #f8fafc;
-    --text-muted: #64748b;
+    --text-muted: #94a3b8;
     --success-color: #10b981;
     --neutral-color: #1e293b;
     --border-color: #1e293b;
+    --focus-ring: 0 0 0 3px rgba(56, 189, 248, 0.5);
 }
 
 body {
@@ -38,6 +39,23 @@ body {
     margin: 0;
     transition: all 0.3s ease;
     overflow-x: hidden;
+}
+
+*:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
 }
 
 .container {
@@ -498,82 +516,85 @@ select.modern-select:focus {
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Morton Timmer</h1>
+    <main class="container">
+        <div id="aria-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+        <header>
+            <h1>Morton Timmer</h1>
+        </header>
         
-        <div class="tabs">
-            <button id="tab-stopwatch" class="tab-btn active" onclick="showTab('stopwatch')">Stopwatch</button>
-            <button id="tab-countdown" class="tab-btn" onclick="showTab('countdown')">Countdown</button>
-            <button id="tab-workout" class="tab-btn" onclick="showTab('workout')">Workout</button>
-            <button id="tab-interval" class="tab-btn" onclick="showTab('interval')">Beep Timer</button>
-            <button id="tab-settings" class="tab-btn" onclick="showTab('settings')">Settings</button>
-        </div>
+        <nav class="tabs" role="tablist" aria-label="Timer Mode Selection">
+            <button id="tab-stopwatch" class="tab-btn active" role="tab" aria-selected="true" aria-controls="stopwatch-section" onclick="showTab('stopwatch')">Stopwatch</button>
+            <button id="tab-countdown" class="tab-btn" role="tab" aria-selected="false" aria-controls="countdown-section" onclick="showTab('countdown')">Countdown</button>
+            <button id="tab-workout" class="tab-btn" role="tab" aria-selected="false" aria-controls="workout-section" onclick="showTab('workout')">Workout</button>
+            <button id="tab-interval" class="tab-btn" role="tab" aria-selected="false" aria-controls="interval-section" onclick="showTab('interval')">Beep Timer</button>
+            <button id="tab-settings" class="tab-btn" role="tab" aria-selected="false" aria-controls="settings-section" onclick="showTab('settings')"><i class="fas fa-cog" aria-hidden="true"></i> Settings</button>
+        </nav>
 
-        <div id="stopwatch-section" class="section">
-            <div class="timer-display" id="stopwatch-display">00:00:00.00</div>
+        <div id="stopwatch-section" class="section" role="tabpanel" aria-labelledby="tab-stopwatch" tabindex="0">
+            <div class="timer-display" id="stopwatch-display" role="timer" aria-live="polite">00:00:00.00</div>
             <div class="controls">
-                <button id="stopwatch-start" class="btn start"><i class="fas fa-play"></i>Start</button>
-                <button id="stopwatch-stop" class="btn stop" disabled><i class="fas fa-pause"></i>Stop</button>
-                <button id="stopwatch-reset" class="btn reset"><i class="fas fa-redo"></i>Reset</button>
+                <button id="stopwatch-start" class="btn start" aria-label="Start Stopwatch"><i class="fas fa-play" aria-hidden="true"></i>Start</button>
+                <button id="stopwatch-stop" class="btn stop" disabled aria-label="Stop Stopwatch"><i class="fas fa-pause" aria-hidden="true"></i>Stop</button>
+                <button id="stopwatch-reset" class="btn reset" aria-label="Reset Stopwatch"><i class="fas fa-redo" aria-hidden="true"></i>Reset</button>
             </div>
         </div>
 
-        <div id="countdown-section" class="section hidden">
+        <div id="countdown-section" class="section hidden" role="tabpanel" aria-labelledby="tab-countdown" tabindex="0">
             <div class="settings">
                 <div class="input-group">
                     <label>Set Time (HH:MM:SS)</label>
                     <div class="time-inputs">
                         <div class="stepper">
-                            <button class="stepper-btn" onclick="changeValue('cd-hours', -1)"><i class="fas fa-minus"></i></button>
-                            <input type="number" id="cd-hours" value="0" min="0" max="99" placeholder="HH">
-                            <button class="stepper-btn" onclick="changeValue('cd-hours', 1)"><i class="fas fa-plus"></i></button>
+                            <button class="stepper-btn" onclick="changeValue('cd-hours', -1)" aria-label="Decrease Hours"><i class="fas fa-minus" aria-hidden="true"></i></button>
+                            <input type="number" id="cd-hours" value="0" min="0" max="99" placeholder="HH" aria-label="Hours">
+                            <button class="stepper-btn" onclick="changeValue('cd-hours', 1)" aria-label="Increase Hours"><i class="fas fa-plus" aria-hidden="true"></i></button>
                         </div>
-                        <span>:</span>
+                        <span aria-hidden="true">:</span>
                         <div class="stepper">
-                            <button class="stepper-btn" onclick="changeValue('cd-minutes', -1)"><i class="fas fa-minus"></i></button>
-                            <input type="number" id="cd-minutes" value="5" min="0" max="59" placeholder="MM">
-                            <button class="stepper-btn" onclick="changeValue('cd-minutes', 1)"><i class="fas fa-plus"></i></button>
+                            <button class="stepper-btn" onclick="changeValue('cd-minutes', -1)" aria-label="Decrease Minutes"><i class="fas fa-minus" aria-hidden="true"></i></button>
+                            <input type="number" id="cd-minutes" value="5" min="0" max="59" placeholder="MM" aria-label="Minutes">
+                            <button class="stepper-btn" onclick="changeValue('cd-minutes', 1)" aria-label="Increase Minutes"><i class="fas fa-plus" aria-hidden="true"></i></button>
                         </div>
-                        <span>:</span>
+                        <span aria-hidden="true">:</span>
                         <div class="stepper">
-                            <button class="stepper-btn" onclick="changeValue('cd-seconds', -1)"><i class="fas fa-minus"></i></button>
-                            <input type="number" id="cd-seconds" value="0" min="0" max="59" placeholder="SS">
-                            <button class="stepper-btn" onclick="changeValue('cd-seconds', 1)"><i class="fas fa-plus"></i></button>
+                            <button class="stepper-btn" onclick="changeValue('cd-seconds', -1)" aria-label="Decrease Seconds"><i class="fas fa-minus" aria-hidden="true"></i></button>
+                            <input type="number" id="cd-seconds" value="0" min="0" max="59" placeholder="SS" aria-label="Seconds">
+                            <button class="stepper-btn" onclick="changeValue('cd-seconds', 1)" aria-label="Increase Seconds"><i class="fas fa-plus" aria-hidden="true"></i></button>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="timer-display" id="countdown-display">00:05:00</div>
+            <div class="timer-display" id="countdown-display" role="timer" aria-live="polite">00:05:00</div>
             <div class="controls">
-                <button id="countdown-start" class="btn start"><i class="fas fa-play"></i>Start</button>
-                <button id="countdown-stop" class="btn stop" disabled><i class="fas fa-pause"></i>Stop</button>
-                <button id="countdown-reset" class="btn reset"><i class="fas fa-redo"></i>Reset</button>
+                <button id="countdown-start" class="btn start" aria-label="Start Countdown"><i class="fas fa-play" aria-hidden="true"></i>Start</button>
+                <button id="countdown-stop" class="btn stop" disabled aria-label="Stop Countdown"><i class="fas fa-pause" aria-hidden="true"></i>Stop</button>
+                <button id="countdown-reset" class="btn reset" aria-label="Reset Countdown"><i class="fas fa-redo" aria-hidden="true"></i>Reset</button>
             </div>
         </div>
 
-        <div id="workout-section" class="section hidden">
+        <div id="workout-section" class="section hidden" role="tabpanel" aria-labelledby="tab-workout" tabindex="0">
             <div class="settings">
                 <div class="input-group">
-                    <label>Rounds</label>
+                    <label for="wk-rounds">Rounds</label>
                     <div class="stepper">
-                        <button class="stepper-btn" onclick="changeValue('wk-rounds', -1)"><i class="fas fa-minus"></i></button>
+                        <button class="stepper-btn" onclick="changeValue('wk-rounds', -1)" aria-label="Decrease Rounds"><i class="fas fa-minus" aria-hidden="true"></i></button>
                         <input type="number" id="wk-rounds" value="8" min="1" style="width: 60px;">
-                        <button class="stepper-btn" onclick="changeValue('wk-rounds', 1)"><i class="fas fa-plus"></i></button>
+                        <button class="stepper-btn" onclick="changeValue('wk-rounds', 1)" aria-label="Increase Rounds"><i class="fas fa-plus" aria-hidden="true"></i></button>
                     </div>
                 </div>
                 <div class="input-group">
                     <label>Work (M:S)</label>
                     <div class="time-inputs">
                         <div class="stepper">
-                            <button class="stepper-btn" onclick="changeValue('wk-work-min', -1)"><i class="fas fa-minus"></i></button>
-                            <input type="number" id="wk-work-min" value="0" min="0" placeholder="M">
-                            <button class="stepper-btn" onclick="changeValue('wk-work-min', 1)"><i class="fas fa-plus"></i></button>
+                            <button class="stepper-btn" onclick="changeValue('wk-work-min', -1)" aria-label="Decrease Work Minutes"><i class="fas fa-minus" aria-hidden="true"></i></button>
+                            <input type="number" id="wk-work-min" value="0" min="0" placeholder="M" aria-label="Work Minutes">
+                            <button class="stepper-btn" onclick="changeValue('wk-work-min', 1)" aria-label="Increase Work Minutes"><i class="fas fa-plus" aria-hidden="true"></i></button>
                         </div>
-                        <span>:</span>
+                        <span aria-hidden="true">:</span>
                         <div class="stepper">
-                            <button class="stepper-btn" onclick="changeValue('wk-work-sec', -1)"><i class="fas fa-minus"></i></button>
-                            <input type="number" id="wk-work-sec" value="20" min="0" max="59" placeholder="S">
-                            <button class="stepper-btn" onclick="changeValue('wk-work-sec', 1)"><i class="fas fa-plus"></i></button>
+                            <button class="stepper-btn" onclick="changeValue('wk-work-sec', -1)" aria-label="Decrease Work Seconds"><i class="fas fa-minus" aria-hidden="true"></i></button>
+                            <input type="number" id="wk-work-sec" value="20" min="0" max="59" placeholder="S" aria-label="Work Seconds">
+                            <button class="stepper-btn" onclick="changeValue('wk-work-sec', 1)" aria-label="Increase Work Seconds"><i class="fas fa-plus" aria-hidden="true"></i></button>
                         </div>
                     </div>
                 </div>
@@ -581,75 +602,75 @@ select.modern-select:focus {
                     <label>Break (M:S)</label>
                     <div class="time-inputs">
                         <div class="stepper">
-                            <button class="stepper-btn" onclick="changeValue('wk-break-min', -1)"><i class="fas fa-minus"></i></button>
-                            <input type="number" id="wk-break-min" value="0" min="0" placeholder="M">
-                            <button class="stepper-btn" onclick="changeValue('wk-break-min', 1)"><i class="fas fa-plus"></i></button>
+                            <button class="stepper-btn" onclick="changeValue('wk-break-min', -1)" aria-label="Decrease Break Minutes"><i class="fas fa-minus" aria-hidden="true"></i></button>
+                            <input type="number" id="wk-break-min" value="0" min="0" placeholder="M" aria-label="Break Minutes">
+                            <button class="stepper-btn" onclick="changeValue('wk-break-min', 1)" aria-label="Increase Break Minutes"><i class="fas fa-plus" aria-hidden="true"></i></button>
                         </div>
-                        <span>:</span>
+                        <span aria-hidden="true">:</span>
                         <div class="stepper">
-                            <button class="stepper-btn" onclick="changeValue('wk-break-sec', -1)"><i class="fas fa-minus"></i></button>
-                            <input type="number" id="wk-break-sec" value="10" min="0" max="59" placeholder="S">
-                            <button class="stepper-btn" onclick="changeValue('wk-break-sec', 1)"><i class="fas fa-plus"></i></button>
+                            <button class="stepper-btn" onclick="changeValue('wk-break-sec', -1)" aria-label="Decrease Break Seconds"><i class="fas fa-minus" aria-hidden="true"></i></button>
+                            <input type="number" id="wk-break-sec" value="10" min="0" max="59" placeholder="S" aria-label="Break Seconds">
+                            <button class="stepper-btn" onclick="changeValue('wk-break-sec', 1)" aria-label="Increase Break Seconds"><i class="fas fa-plus" aria-hidden="true"></i></button>
                         </div>
                     </div>
                 </div>
             </div>
-            <div id="wk-status" class="status-label">Ready</div>
-            <div class="timer-display" id="workout-display">00:20</div>
-            <div id="wk-rounds-display" class="rounds-display">Round 1 of 8</div>
+            <div id="wk-status" class="status-label" aria-live="polite">Ready</div>
+            <div class="timer-display" id="workout-display" role="timer" aria-live="polite">00:20</div>
+            <div id="wk-rounds-display" class="rounds-display" aria-live="polite">Round 1 of 8</div>
             <div class="controls">
-                <button id="workout-start" class="btn start"><i class="fas fa-play"></i>Start</button>
-                <button id="workout-stop" class="btn stop" disabled><i class="fas fa-pause"></i>Stop</button>
-                <button id="workout-reset" class="btn reset"><i class="fas fa-redo"></i>Reset</button>
+                <button id="workout-start" class="btn start" aria-label="Start Workout"><i class="fas fa-play" aria-hidden="true"></i>Start</button>
+                <button id="workout-stop" class="btn stop" disabled aria-label="Stop Workout"><i class="fas fa-pause" aria-hidden="true"></i>Stop</button>
+                <button id="workout-reset" class="btn reset" aria-label="Reset Workout"><i class="fas fa-redo" aria-hidden="true"></i>Reset</button>
             </div>
         </div>
 
-        <div id="interval-section" class="section hidden">
+        <div id="interval-section" class="section hidden" role="tabpanel" aria-labelledby="tab-interval" tabindex="0">
             <div class="settings">
                 <div class="input-group">
                     <label for="total-time">Total Time (min)</label>
                     <div class="stepper">
-                        <button class="stepper-btn" onclick="changeValue('total-time', -1)"><i class="fas fa-minus"></i></button>
+                        <button class="stepper-btn" onclick="changeValue('total-time', -1)" aria-label="Decrease Total Time"><i class="fas fa-minus" aria-hidden="true"></i></button>
                         <input type="number" id="total-time" value="10" min="1">
-                        <button class="stepper-btn" onclick="changeValue('total-time', 1)"><i class="fas fa-plus"></i></button>
+                        <button class="stepper-btn" onclick="changeValue('total-time', 1)" aria-label="Increase Total Time"><i class="fas fa-plus" aria-hidden="true"></i></button>
                     </div>
                 </div>
                 <div class="input-group">
                     <label>Beep Every (M:S)</label>
                     <div class="interval-inputs">
                         <div class="stepper">
-                            <button class="stepper-btn" onclick="changeValue('interval-min', -1)"><i class="fas fa-minus"></i></button>
-                            <input type="number" id="interval-min" value="1" min="0" placeholder="M">
-                            <button class="stepper-btn" onclick="changeValue('interval-min', 1)"><i class="fas fa-plus"></i></button>
+                            <button class="stepper-btn" onclick="changeValue('interval-min', -1)" aria-label="Decrease Interval Minutes"><i class="fas fa-minus" aria-hidden="true"></i></button>
+                            <input type="number" id="interval-min" value="1" min="0" placeholder="M" aria-label="Interval Minutes">
+                            <button class="stepper-btn" onclick="changeValue('interval-min', 1)" aria-label="Increase Interval Minutes"><i class="fas fa-plus" aria-hidden="true"></i></button>
                         </div>
-                        <span>:</span>
+                        <span aria-hidden="true">:</span>
                         <div class="stepper">
-                            <button class="stepper-btn" onclick="changeValue('interval-sec', -1)"><i class="fas fa-minus"></i></button>
-                            <input type="number" id="interval-sec" value="0" min="0" max="59" placeholder="S">
-                            <button class="stepper-btn" onclick="changeValue('interval-sec', 1)"><i class="fas fa-plus"></i></button>
+                            <button class="stepper-btn" onclick="changeValue('interval-sec', -1)" aria-label="Decrease Interval Seconds"><i class="fas fa-minus" aria-hidden="true"></i></button>
+                            <input type="number" id="interval-sec" value="0" min="0" max="59" placeholder="S" aria-label="Interval Seconds">
+                            <button class="stepper-btn" onclick="changeValue('interval-sec', 1)" aria-label="Increase Interval Seconds"><i class="fas fa-plus" aria-hidden="true"></i></button>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="timer-display" id="interval-display">10:00</div>
-            <div id="next-interval" class="next-interval">Next beep in: 01:00</div>
+            <div class="timer-display" id="interval-display" role="timer" aria-live="polite">10:00</div>
+            <div id="next-interval" class="next-interval" aria-live="polite">Next beep in: 01:00</div>
             <div class="controls">
-                <button id="interval-start" class="btn start"><i class="fas fa-play"></i>Start</button>
-                <button id="interval-stop" class="btn stop" disabled><i class="fas fa-pause"></i>Stop</button>
-                <button id="interval-reset" class="btn reset"><i class="fas fa-redo"></i>Reset</button>
+                <button id="interval-start" class="btn start" aria-label="Start Beep Timer"><i class="fas fa-play" aria-hidden="true"></i>Start</button>
+                <button id="interval-stop" class="btn stop" disabled aria-label="Stop Beep Timer"><i class="fas fa-pause" aria-hidden="true"></i>Stop</button>
+                <button id="interval-reset" class="btn reset" aria-label="Reset Beep Timer"><i class="fas fa-redo" aria-hidden="true"></i>Reset</button>
             </div>
         </div>
 
-        <div id="settings-section" class="section hidden">
+        <div id="settings-section" class="section hidden" role="tabpanel" aria-labelledby="tab-settings" tabindex="0">
             <div class="settings-container">
                 <div class="settings-card">
-                    <h2><i class="fas fa-volume-up"></i> Sound Settings</h2>
+                    <h2><i class="fas fa-volume-up" aria-hidden="true"></i> Sound Settings</h2>
                     <div class="settings-option">
-                        <label>Beep Volume</label>
-                        <input type="range" id="beep-volume" class="range-input" min="0" max="1" step="0.1" value="0.5">
+                        <label for="beep-volume">Beep Volume</label>
+                        <input type="range" id="beep-volume" class="range-input" min="0" max="1" step="0.1" value="0.5" aria-label="Adjust Beep Volume">
                     </div>
                     <div class="settings-option">
-                        <label>Beep Sound</label>
+                        <label for="beep-type">Beep Sound</label>
                         <select id="beep-type" class="modern-select">
                             <option value="classic">Classic (Sine)</option>
                             <option value="robot">Robot (Square)</option>
@@ -663,22 +684,22 @@ select.modern-select:focus {
                             <option value="coach">Gym Coach (Neutral)</option>
                         </select>
                     </div>
-                    <button class="btn reset" onclick="testBeep()" style="width: 100%; min-width: 0; padding: 1rem;">
-                        <i class="fas fa-bell"></i> Test Sound
+                    <button class="btn reset" onclick="testBeep()" style="width: 100%; min-width: 0; padding: 1rem;" aria-label="Test current beep sound">
+                        <i class="fas fa-bell" aria-hidden="true"></i> Test Sound
                     </button>
                 </div>
                 
                 <div class="settings-card">
-                    <h2><i class="fas fa-user-shield"></i> Persona Settings</h2>
+                    <h2><i class="fas fa-user-shield" aria-hidden="true"></i> Persona Settings</h2>
                     <div class="settings-option">
-                        <label>Gendered Responses</label>
+                        <label for="gendered-enabled">Gendered Responses</label>
                         <select id="gendered-enabled" class="modern-select" onchange="saveSettings()">
                             <option value="true">On</option>
                             <option value="false">Off (Neutral Only)</option>
                         </select>
                     </div>
                     <div class="settings-option">
-                        <label>Preferred Gender</label>
+                        <label for="user-gender">Preferred Gender</label>
                         <select id="user-gender" class="modern-select" onchange="saveSettings()">
                             <option value="masculine">Masculine</option>
                             <option value="feminine">Feminine</option>
@@ -686,7 +707,7 @@ select.modern-select:focus {
                         </select>
                     </div>
                     <div class="settings-option">
-                        <label>Response Sentiment</label>
+                        <label for="response-sentiment">Response Sentiment</label>
                         <select id="response-sentiment" class="modern-select" onchange="saveSettings()">
                             <option value="positive">Positive Only</option>
                             <option value="mixed">Mixed</option>
@@ -696,19 +717,19 @@ select.modern-select:focus {
                 </div>
 
                 <div class="settings-card">
-                    <h2><i class="fas fa-trash-alt"></i> Data Management</h2>
+                    <h2><i class="fas fa-trash-alt" aria-hidden="true"></i> Data Management</h2>
                     <div class="settings-option">
                         <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
                             Reset all timer values and settings to their default states. This action cannot be undone.
                         </p>
-                        <button class="danger-btn" onclick="clearAllData()">
-                            <i class="fas fa-exclamation-triangle"></i> Clear All Storage
+                        <button class="danger-btn" onclick="clearAllData()" aria-label="Clear all local storage and reset settings">
+                            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i> Clear All Storage
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
     <script>
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -718,6 +739,11 @@ if ('serviceWorker' in navigator) {
     });
 }
 // UI Helpers
+function announce(text) {
+    const el = document.getElementById('aria-status');
+    if (el) el.textContent = text;
+}
+
 function changeValue(id, delta) {
     const input = document.getElementById(id);
     if (!input) return;
@@ -731,11 +757,22 @@ function changeValue(id, delta) {
 
 // Tab Switching
 function showTab(tab) {
-    document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    const sections = document.querySelectorAll('.section');
+    const tabs = document.querySelectorAll('.tab-btn');
+    const activeSection = document.getElementById(`${tab}-section`);
+    const activeTab = document.getElementById(`tab-${tab}`);
     
-    document.getElementById(`${tab}-section`).classList.remove('hidden');
-    document.getElementById(`tab-${tab}`).classList.add('active');
+    if (!activeSection || !activeTab) return;
+    
+    sections.forEach(s => s.classList.add('hidden'));
+    tabs.forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+    });
+    
+    activeSection.classList.remove('hidden');
+    activeTab.classList.add('active');
+    activeTab.setAttribute('aria-selected', 'true');
     
     // Save current tab
     localStorage.setItem('lastTab', tab);
@@ -1185,6 +1222,7 @@ function formatStopwatch(ms) {
 }
 
 stopwatchStartBtn.addEventListener('click', () => {
+    announce("Stopwatch started");
     const startTime = Date.now() - stopwatchTime;
     stopwatchInterval = setInterval(() => {
         stopwatchTime = Date.now() - startTime;
@@ -1195,6 +1233,7 @@ stopwatchStartBtn.addEventListener('click', () => {
 });
 
 stopwatchStopBtn.addEventListener('click', () => {
+    announce("Stopwatch stopped");
     clearInterval(stopwatchInterval);
     stopwatchStartBtn.disabled = false;
     stopwatchStopBtn.disabled = true;
@@ -1229,6 +1268,7 @@ function updateCountdownDisplay() {
 
 countdownStartBtn.addEventListener('click', () => {
     if (!countdownTimerId) {
+        announce("Countdown started");
         if (countdownRemaining === undefined || countdownRemaining <= 0) updateCountdownDisplay();
         if (countdownRemaining <= 0) return;
 
@@ -1238,6 +1278,7 @@ countdownStartBtn.addEventListener('click', () => {
                 countdownRemaining = 0;
                 clearInterval(countdownTimerId);
                 countdownTimerId = null;
+                announce("Countdown finished!");
                 playBeep(440, 0.5);
                 setTimeout(() => playBeep(440, 0.5), 600);
                 countdownDisplay.classList.add('finished');
@@ -1297,6 +1338,7 @@ function updateWorkoutDisplay() {
 
 workoutStartBtn.addEventListener('click', () => {
     if (!workoutTimerId) {
+        announce("Workout timer started");
         if (workoutRound === undefined) {
             workoutRound = 1;
             workoutPhase = 'work';
@@ -1321,6 +1363,7 @@ workoutStartBtn.addEventListener('click', () => {
                     if (workoutRound > workoutTotalRounds) {
                         clearInterval(workoutTimerId);
                         workoutTimerId = null;
+                        announce("Workout finished!");
                         workoutStatus.textContent = "Finished!";
                         workoutDisplay.classList.add('finished');
                         playBeep(880, 0.5);
@@ -1388,6 +1431,7 @@ function updateIntervalDisplay() {
 
 intervalStartBtn.addEventListener('click', () => {
     if (!intervalTimerId) {
+        announce("Beep timer started");
         if (intervalTotalRemaining === undefined) updateIntervalDisplay();
         
         const totalMin = parseInt(document.getElementById('total-time').value) || 0;
@@ -1405,6 +1449,7 @@ intervalStartBtn.addEventListener('click', () => {
             if (intervalTotalRemaining <= 0) {
                 clearInterval(intervalTimerId);
                 intervalTimerId = null;
+                announce("Beep timer finished!");
                 intervalDisplay.textContent = "00:00";
                 nextIntervalDisplay.textContent = "Finished!";
                 nextIntervalDisplay.classList.add('finished');
