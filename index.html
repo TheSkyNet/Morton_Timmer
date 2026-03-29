@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Morton Timmer - Pro Timer Suite</title>
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -26,6 +26,12 @@
     --neutral-color: #1e293b;
     --border-color: #1e293b;
     --focus-ring: 0 0 0 3px rgba(56, 189, 248, 0.5);
+}
+
+button, select {
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 body {
@@ -68,6 +74,7 @@ body {
     min-height: 100vh;
     box-sizing: border-box;
     text-align: center;
+    touch-action: manipulation;
 }
 
 h1 {
