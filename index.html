@@ -788,6 +788,39 @@ function announce(text) {
     if (el) el.textContent = text;
 }
 
+// Screen Wake Lock API
+let wakeLock = null;
+const activeTimers = new Set();
+
+async function requestWakeLock() {
+    if (!('wakeLock' in navigator)) return;
+    try {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => {
+            wakeLock = null;
+        });
+    } catch (err) {
+        console.error(`Wake Lock Error: ${err.name}, ${err.message}`);
+    }
+}
+
+async function updateWakeLock() {
+    if (activeTimers.size > 0) {
+        if (!wakeLock) await requestWakeLock();
+    } else {
+        if (wakeLock) {
+            await wakeLock.release();
+            wakeLock = null;
+        }
+    }
+}
+
+document.addEventListener('visibilitychange', async () => {
+    if (activeTimers.size > 0 && document.visibilityState === 'visible') {
+        await updateWakeLock();
+    }
+});
+
 function changeValue(id, delta) {
     const input = document.getElementById(id);
     if (!input) return;
@@ -1280,6 +1313,8 @@ function formatStopwatch(ms) {
 
 stopwatchStartBtn.addEventListener('click', () => {
     announce("Stopwatch started");
+    activeTimers.add('stopwatch');
+    updateWakeLock();
     const startTime = Date.now() - stopwatchTime;
     stopwatchInterval = setInterval(() => {
         stopwatchTime = Date.now() - startTime;
@@ -1291,12 +1326,16 @@ stopwatchStartBtn.addEventListener('click', () => {
 
 stopwatchStopBtn.addEventListener('click', () => {
     announce("Stopwatch stopped");
+    activeTimers.delete('stopwatch');
+    updateWakeLock();
     clearInterval(stopwatchInterval);
     stopwatchStartBtn.disabled = false;
     stopwatchStopBtn.disabled = true;
 });
 
 stopwatchResetBtn.addEventListener('click', () => {
+    activeTimers.delete('stopwatch');
+    updateWakeLock();
     clearInterval(stopwatchInterval);
     stopwatchTime = 0;
     stopwatchDisplay.textContent = "00:00:00.00";
@@ -1328,11 +1367,15 @@ countdownStartBtn.addEventListener('click', () => {
         announce("Countdown started");
         if (countdownRemaining === undefined || countdownRemaining <= 0) updateCountdownDisplay();
         if (countdownRemaining <= 0) return;
+        activeTimers.add('countdown');
+        updateWakeLock();
 
         countdownTimerId = setInterval(() => {
             countdownRemaining -= 1000;
             if (countdownRemaining <= 0) {
                 countdownRemaining = 0;
+                activeTimers.delete('countdown');
+                updateWakeLock();
                 clearInterval(countdownTimerId);
                 countdownTimerId = null;
                 announce("Countdown finished!");
@@ -1351,6 +1394,8 @@ countdownStartBtn.addEventListener('click', () => {
 });
 
 countdownStopBtn.addEventListener('click', () => {
+    activeTimers.delete('countdown');
+    updateWakeLock();
     clearInterval(countdownTimerId);
     countdownTimerId = null;
     countdownStartBtn.disabled = false;
@@ -1358,6 +1403,8 @@ countdownStopBtn.addEventListener('click', () => {
 });
 
 countdownResetBtn.addEventListener('click', () => {
+    activeTimers.delete('countdown');
+    updateWakeLock();
     clearInterval(countdownTimerId);
     countdownTimerId = null;
     updateCountdownDisplay();
@@ -1404,6 +1451,8 @@ workoutStartBtn.addEventListener('click', () => {
             const ws = parseInt(document.getElementById('wk-work-sec').value) || 0;
             workoutRemainingMs = (wm * 60 + ws) * 1000;
         }
+        activeTimers.add('workout');
+        updateWakeLock();
 
         workoutTimerId = setInterval(() => {
             workoutRemainingMs -= 1000;
@@ -1418,6 +1467,8 @@ workoutStartBtn.addEventListener('click', () => {
                 } else {
                     workoutRound++;
                     if (workoutRound > workoutTotalRounds) {
+                        activeTimers.delete('workout');
+                        updateWakeLock();
                         clearInterval(workoutTimerId);
                         workoutTimerId = null;
                         announce("Workout finished!");
@@ -1449,6 +1500,8 @@ workoutStartBtn.addEventListener('click', () => {
 });
 
 workoutStopBtn.addEventListener('click', () => {
+    activeTimers.delete('workout');
+    updateWakeLock();
     clearInterval(workoutTimerId);
     workoutTimerId = null;
     workoutStartBtn.disabled = false;
@@ -1456,6 +1509,8 @@ workoutStopBtn.addEventListener('click', () => {
 });
 
 workoutResetBtn.addEventListener('click', () => {
+    activeTimers.delete('workout');
+    updateWakeLock();
     clearInterval(workoutTimerId);
     workoutTimerId = null;
     workoutRound = undefined;
@@ -1497,12 +1552,16 @@ intervalStartBtn.addEventListener('click', () => {
         
         if (intervalTotalRemaining <= 0 || intervalDuration <= 0) return;
         if (currentIntervalRemaining === undefined) currentIntervalRemaining = intervalDuration;
+        activeTimers.add('beep');
+        updateWakeLock();
 
         intervalTimerId = setInterval(() => {
             intervalTotalRemaining -= 1000;
             currentIntervalRemaining -= 1000;
 
             if (intervalTotalRemaining <= 0) {
+                activeTimers.delete('beep');
+                updateWakeLock();
                 clearInterval(intervalTimerId);
                 intervalTimerId = null;
                 announce("Beep timer finished!");
@@ -1531,6 +1590,8 @@ intervalStartBtn.addEventListener('click', () => {
 });
 
 intervalStopBtn.addEventListener('click', () => {
+    activeTimers.delete('beep');
+    updateWakeLock();
     clearInterval(intervalTimerId);
     intervalTimerId = null;
     intervalStartBtn.disabled = false;
@@ -1538,6 +1599,8 @@ intervalStopBtn.addEventListener('click', () => {
 });
 
 intervalResetBtn.addEventListener('click', () => {
+    activeTimers.delete('beep');
+    updateWakeLock();
     clearInterval(intervalTimerId);
     intervalTimerId = null;
     intervalTotalRemaining = undefined;
